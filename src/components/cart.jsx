@@ -68,7 +68,6 @@ class CartView extends Component {
                   <Item.Description>paragraph</Item.Description>
                   <Item.Extra>
                     <Button
-                      danger
                       floated="right"
                       onClick={() => this.removeFromCart(item.id)}
                     >

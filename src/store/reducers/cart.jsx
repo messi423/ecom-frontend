@@ -19,6 +19,11 @@ const cartFail = (state, action) => {
   return updateObject(state, { loading: false, error: action.error });
 };
 
+const cartRestore = (state, action) => {
+  console.log("restored");
+  return updateObject(state, { order: null });
+};
+
 const cartReducer = (state = initialState, action) => {
   switch (action.type) {
     case at.CART_SUCCESS:
@@ -27,6 +32,8 @@ const cartReducer = (state = initialState, action) => {
       return cartStart(state, action);
     case at.CART_FAIL:
       return cartFail(state, action);
+    case at.CART_RESTORE:
+      return cartRestore(state, action);
     default:
       return state;
   }

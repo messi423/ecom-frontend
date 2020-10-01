@@ -9,20 +9,28 @@ import {
   Image,
   List,
   Menu,
+  Dimmer,
+  Loader,
   Segment,
 } from "semantic-ui-react";
 import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { logout } from "../store/actions/auth";
 import { fetchCart } from "../store/actions/cart";
-import { authAxios } from "../utils";
+import { CART_RESTORE } from "../store/actions/actionTypes";
 
 class CustomLayout extends React.Component {
-  // constructor(props) {
-  //   super();
-  //   this.state = {
-  //     order: "",
-  //   };
+  // componentDidUpdate(prevState, prevProps) {
+  //   if (
+  //     prevProps.order !== this.props.order &&
+  //     localStorage.getItem("token") !== null
+  //   ) {
+  //     this.props.fetchCart();
+  //   }
+
+  //   if (prevProps !== this.props && localStorage.getItem("token") === null) {
+  //     this.setState({ order: null });
+  //   }
   // }
 
   // static getDerivedStateFromProps(props, state) {
@@ -37,30 +45,16 @@ class CustomLayout extends React.Component {
   // }
 
   componentDidMount() {
-    console.log(this.props.authenticated);
-    this.props.fetchCart();
-  }
-
-  componentDidUpdate(newProps) {
-    if (
-      newProps.authenticated !== this.props.authenticated &&
-      localStorage.getItem("token") !== null
-    ) {
+    console.log(!!localStorage.getItem("token"));
+    if (this.props.authenticated) {
       this.props.fetchCart();
       console.log("after logged in token");
-    }
-
-    if (
-      newProps.authenticated !== this.props.authenticated &&
-      localStorage.getItem("token") === null
-    ) {
-      this.props.fetchCart();
-      console.log("after loggedout token");
     }
   }
 
   render() {
     const { authenticated, loading, order } = this.props;
+    //const { order, authenticated } = this.state;
 
     return (
       <Container>
@@ -73,69 +67,73 @@ class CustomLayout extends React.Component {
               <Link to="/products">
                 <Menu.Item header>Products</Menu.Item>
               </Link>
-              {authenticated ? (
-                <React.Fragment>
-                  <Menu.Menu position="right">
-                    <Menu.Item>
-                      <Link to="/">Profile</Link>
-                    </Menu.Item>
-                    <Menu.Item>
-                      <Button primary>
-                        <Icon name="shopping cart" />
-                        <Link to="/cart" style={{ color: "black" }}>{`${
-                          order !== null ? order.items.length : 0
-                        }`}</Link>
-                      </Button>
-                    </Menu.Item>
-                    {/* <Dropdown
-                    icon="cart"
-                    loading={loading}
-                    text={`${cart !== null ? cart.order_items.length : 0}`}
-                    pointing
-                    className="link item"
-                  > 
-                    <Dropdown.Menu>
-                      {cart !== null ? (
-                        <React.Fragment>
-                          {cart.order_items.map(order_item => {
-                            return (
-                              <Dropdown.Item key={order_item.id}>
-                                {order_item.quantity} x {order_item.item.title}
-                              </Dropdown.Item>
-                            );
-                          })}
-                          {cart.order_items.length < 1 ? (
-                            <Dropdown.Item>No items in your cart</Dropdown.Item>
-                          ) : null}
-                          <Dropdown.Divider />
-
-                          <Dropdown.Item
-                            icon="arrow right"
-                            text="Checkout"
-                            onClick={() =>
-                              this.props.history.push("/order-summary")
-                            }
-                          />
-                        </React.Fragment>
-                      ) : (
-                        <Dropdown.Item>No items in your cart</Dropdown.Item>
-                      )}
-                    </Dropdown.Menu>
-                  </Dropdown>*/}
-                    <Menu.Item
-                      header
-                      onClick={() => {
-                        console.log(this.props);
-                        this.props.logout();
-                        console.log(this.props);
-                        this.props.fetchCart();
-                        this.props.history.push("/");
-                      }}
-                    >
-                      Logout
-                    </Menu.Item>
-                  </Menu.Menu>
-                </React.Fragment>
+              {authenticated && order !== {} ? (
+                loading ? (
+                  <Dimmer active>
+                    <Loader size="massive">Loading</Loader>
+                  </Dimmer>
+                ) : (
+                  <React.Fragment>
+                    <Menu.Menu position="right">
+                      <Menu.Item>
+                        <Link to="/">Profile</Link>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <Button primary>
+                          <Icon name="shopping cart" />
+                          <Link to="/cart" style={{ color: "black" }}>{`${
+                            order !== null ? order.items.length : 0
+                          }`}</Link>
+                        </Button>
+                      </Menu.Item>
+                      {/* <Dropdown
+                      icon="cart"
+                      loading={loading}
+                      text={`${cart !== null ? cart.order_items.length : 0}`}
+                      pointing
+                      className="link item"
+                    > 
+                      <Dropdown.Menu>
+                        {cart !== null ? (
+                          <React.Fragment>
+                            {cart.order_items.map(order_item => {
+                              return (
+                                <Dropdown.Item key={order_item.id}>
+                                  {order_item.quantity} x {order_item.item.title}
+                                </Dropdown.Item>
+                              );
+                            })}
+                            {cart.order_items.length < 1 ? (
+                              <Dropdown.Item>No items in your cart</Dropdown.Item>
+                            ) : null}
+                            <Dropdown.Divider />
+  
+                            <Dropdown.Item
+                              icon="arrow right"
+                              text="Checkout"
+                              onClick={() =>
+                                this.props.history.push("/order-summary")
+                              }
+                            />
+                          </React.Fragment>
+                        ) : (
+                          <Dropdown.Item>No items in your cart</Dropdown.Item>
+                        )}
+                      </Dropdown.Menu>
+                    </Dropdown>*/}
+                      <Menu.Item
+                        header
+                        onClick={() => {
+                          this.props.logout();
+                          this.props.cartRestore();
+                          this.props.history.push("/");
+                        }}
+                      >
+                        Logout
+                      </Menu.Item>
+                    </Menu.Menu>
+                  </React.Fragment>
+                )
               ) : (
                 <Menu.Menu position="right">
                   <Link to="/login">
@@ -230,6 +228,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     logout: () => dispatch(logout()),
     fetchCart: () => dispatch(fetchCart()),
+    cartRestore: () => dispatch({ type: CART_RESTORE }),
   };
 };
 

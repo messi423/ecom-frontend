@@ -1,6 +1,6 @@
 import * as at from "./actionTypes";
 import axios from "axios";
-import { fetchCart } from "./cart";
+import { fetchCart, cartSuccess } from "./cart";
 
 export const authStart = () => {
   console.log("start");
@@ -57,6 +57,10 @@ export const authLogin = (username, password) => {
         const expirationDate = new Date(new Date().getTime() + 3600);
         localStorage.setItem("token", token);
         localStorage.setItem("expirationDate", expirationDate);
+        // fetchCart().then((res) => {
+        //   console.log(res);
+        //   dispatch(cartSuccess(res.data));
+        // });
         dispatch(authSuccess(token));
         dispatch(checkAuthTimeout(3600));
       })

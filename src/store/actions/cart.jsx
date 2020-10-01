@@ -22,17 +22,21 @@ export const cartFail = (error) => {
   };
 };
 
+// export const fetchCart = () => {
+//   console.log("thsjabsjh");
+//   const order = {};
+//   return authAxios.get(cartView);
+// };
 export const fetchCart = () => {
   return (dispatch) => {
     dispatch(cartStart());
     authAxios
       .get(cartView)
       .then((res) => {
-        const order = res.data;
-        dispatch(cartSuccess(order));
+        dispatch(cartSuccess(res.data));
       })
-      .catch((error) => {
-        dispatch(cartFail(error));
+      .catch((err) => {
+        dispatch(cartFail(err));
       });
   };
 };
