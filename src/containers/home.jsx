@@ -67,7 +67,7 @@ class CustomLayout extends React.Component {
               <Link to="/products">
                 <Menu.Item header>Products</Menu.Item>
               </Link>
-              {authenticated && order !== {} ? (
+              {authenticated ? (
                 loading ? (
                   <Dimmer active>
                     <Loader size="massive">Loading</Loader>
@@ -76,7 +76,7 @@ class CustomLayout extends React.Component {
                   <React.Fragment>
                     <Menu.Menu position="right">
                       <Menu.Item>
-                        <Link to="/">Profile</Link>
+                        <Link to="/profile">Profile</Link>
                       </Menu.Item>
                       <Menu.Item>
                         <Button primary>
@@ -218,7 +218,7 @@ class CustomLayout extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    authenticated: state.auth.token !== null,
+    authenticated: localStorage.getItem("token") !== null,
     order: state.cart.order,
     loading: state.cart.loading,
   };

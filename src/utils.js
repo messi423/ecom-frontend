@@ -9,6 +9,12 @@ export const productDetail = (id) => `${endpoint}/article/${id}/`;
 export const cartView = `${endpoint}/order/`;
 export const addToCart = `${endpoint}/add-to-cart/`;
 export const removeCart = (id) => `${endpoint}/remove-from-cart/${id}/`;
+export const getAddresses = `${endpoint}/address/`;
+export const deleteAddress = (id) => `${endpoint}/address/${id}/`;
+export const postAddress = `${endpoint}/address/`;
+export const updateAddress = (id) => `${endpoint}/address/${id}`;
+export const getProfile = `${endpoint}/profile/`;
+export const getUser = `${endpoint}/user/`;
 
 export const authAxios = axios.create({
   baseURL: endpoint,
