@@ -10,9 +10,9 @@ import LoginForm from "./containers/login";
 import SignupForm from "./containers/signup";
 
 class App extends Component {
-  componentDidMount() {
-    this.props.onTryAutoSignup();
-  }
+  // componentDidMount() {
+  //   this.props.onTryAutoSignup();
+  // }
 
   render() {
     return (

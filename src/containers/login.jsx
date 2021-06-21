@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import * as actions from "../store/actions/auth";
 import { connect } from "react-redux";
+import CSRFToken from "../hoc/hoc";
 import {
   Button,
   Form,
@@ -68,7 +69,7 @@ class LoginForm extends Component {
                 placeholder="Password"
                 type="password"
               />
-
+              <CSRFToken />
               <Button
                 color="teal"
                 fluid

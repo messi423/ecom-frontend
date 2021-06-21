@@ -1,7 +1,11 @@
 import React, { Component } from "react";
-import { Elements, CardElement } from "@stripe/react-stripe-js";
+import {
+  Elements,
+  CardElement,
+  ElementsConsumer,
+} from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { authAxios, cartView, getAddresses } from "../utils";
+import { authAxios, cartView, getAddresses, paymentURL } from "../utils";
 import {
   Grid,
   Item,
@@ -18,6 +22,24 @@ import {
   ItemMeta,
 } from "semantic-ui-react";
 import { Link, withRouter } from "react-router-dom";
+
+const CARD_ELEMENT_OPTIONS = {
+  style: {
+    base: {
+      color: "#32325d",
+      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+      fontSmoothing: "antialiased",
+      fontSize: "16px",
+      "::placeholder": {
+        color: "#aab7c4",
+      },
+    },
+    invalid: {
+      color: "#fa755a",
+      iconColor: "#fa755a",
+    },
+  },
+};
 
 const OrderPreview = (props) => {
   const { order } = props;
@@ -110,32 +132,42 @@ class CheckoutForm extends React.Component {
     this.setState({ [name]: value });
   };
 
-  submit = (ev) => {
-    // ev.preventDefault();
-    // this.setState({ loading: true });
-    // if (this.props.stripe) {
-    //   this.props.stripe.createToken().then((result) => {
-    //     if (result.error) {
-    //       this.setState({ error: result.error.message, loading: false });
-    //     } else {
-    //       this.setState({ error: null });
-    //       const { selectedAddress } = this.state;
-    //       authAxios
-    //         .post("scheckoutURL", {
-    //           stripeToken: result.token.id,
-    //           selectedAddress,
-    //         })
-    //         .then((res) => {
-    //           this.setState({ loading: false, success: true });
-    //         })
-    //         .catch((err) => {
-    //           this.setState({ loading: false, error: err });
-    //         });
-    //     }
-    //   });
-    // } else {
-    //   console.log("Stripe is not loaded");
-    // }
+  submit = (event) => {
+    // We don't want to let default form submission happen here,
+    // which would refresh the page.
+    event.preventDefault();
+    this.setState({ loading: true });
+    const { stripe, elements } = this.props;
+
+    if (!stripe || !elements) {
+      // Stripe.js has not yet loaded.
+      // Make  sure to disable form submission until Stripe.js has loaded.
+      console.log("not loaded yet");
+      return;
+    }
+
+    const card = elements.getElement(CardElement);
+    stripe.createToken(card).then((result) => {
+      if (result.error) {
+        this.setState({ error: result.error.message, loading: false });
+        console.log(result.error.message);
+      } else {
+        this.setState({ error: null });
+        const { selected_address } = this.state;
+        authAxios
+          .post(paymentURL, {
+            stripeToken: result.token.id,
+            selected_address,
+          })
+          .then((res) => {
+            console.log(res);
+            this.setState({ loading: false, success: true });
+          })
+          .catch((err) => {
+            this.setState({ loading: false, error: err.message });
+          });
+      }
+    });
   };
 
   render() {
@@ -157,73 +189,76 @@ class CheckoutForm extends React.Component {
             content={JSON.stringify(error)}
           />
         )}
-        {loading ? (
-          <Segment>
-            <Dimmer active inverted>
-              <Loader inverted>Loading</Loader>
-            </Dimmer>
-            <Image src="/images/wireframe/short-paragraph.png" />
-          </Segment>
-        ) : (
-          <Container>
-            <OrderPreview order={order} />
-            <Divider />
+        {success && (
+          <Message
+            success
+            header="Payment is successful !!"
+            content={JSON.stringify(success)}
+          />
+        )}
 
-            <Header>Select a billing address</Header>
-            {addresses.length > 0 ? (
-              <Select
-                name="selected_address"
-                value={selected_address}
-                options={addresses}
-                selection
-                onChange={this.handleSelectChange}
-              />
-            ) : (
-              <p>
-                You need to <Link to="/profile">add a billing address</Link>
-              </p>
-            )}
-            <Divider />
+        <Container>
+          <OrderPreview order={order} />
+          <Divider />
 
-            {addresses.length < 1 ? (
-              <p>
-                You need to add addresses before you can complete your purchase
-              </p>
-            ) : (
-              <React.Fragment>
-                <Header>Would you like to complete the purchase?</Header>
-                <Divider />
-                <CardElement />
-                {success && (
-                  <Message positive>
-                    <Message.Header>Your payment was successful</Message.Header>
-                    <p>
-                      Go to your <b>profile</b> to see the order delivery
-                      status.
-                    </p>
-                  </Message>
-                )}
+          <Header>Select a billing address</Header>
+          {addresses.length > 0 ? (
+            <Select
+              name="selected_address"
+              value={selected_address}
+              options={addresses}
+              selection
+              onChange={this.handleSelectChange}
+            />
+          ) : (
+            <p>
+              You need to <Link to="/profile">add a billing address</Link>
+            </p>
+          )}
+          <Divider />
+
+          {addresses.length < 1 ? (
+            <p>
+              You need to add addresses before you can complete your purchase
+            </p>
+          ) : (
+            <React.Fragment>
+              {success && (
+                <Message positive>
+                  <Message.Header>Your payment was successful</Message.Header>
+                  <p>
+                    Go to your <b>profile</b> to see the order delivery status.
+                  </p>
+                </Message>
+              )}
+              <Header>Would you like to complete the purchase?</Header>
+              <Divider />
+              <form onSubmit={this.submit}>
+                <label>
+                  <CardElement options={CARD_ELEMENT_OPTIONS} />
+                </label>
                 <Divider />
                 <Divider />
                 <Button
                   loading={loading}
-                  disabled={loading}
                   primary
-                  onClick={this.submit}
                   style={{ marginTop: "10px" }}
+                  disabled={!this.props.stripe}
                 >
-                  Submit
+                  Confirm order
                 </Button>
-              </React.Fragment>
-            )}
-          </Container>
-        )}
+              </form>
+            </React.Fragment>
+          )}
+        </Container>
       </div>
     );
   }
 }
 
-const stripePromise = loadStripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
+const stripePromise = loadStripe(
+  "pk_test_51HYPhiFXUm04DyJSvFSloc40eJmHEMg1XRntMY019aiPCefLTzPQidZijuIOnRvEHKirwVJk9gDF8vIVS4z3mxdQ00VCpHYqxs"
+);
 //const InjectedForm = injectStripe(CheckoutForm);
 
 class WrappedForm extends Component {
@@ -233,7 +268,11 @@ class WrappedForm extends Component {
         <Container text>
           <h1>Complete your order</h1>
           <Elements stripe={stripePromise}>
-            <CheckoutForm />
+            <ElementsConsumer>
+              {({ stripe, elements }) => (
+                <CheckoutForm stripe={stripe} elements={elements} />
+              )}
+            </ElementsConsumer>
           </Elements>
         </Container>
       </React.Fragment>

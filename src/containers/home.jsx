@@ -32,6 +32,9 @@ class CustomLayout extends React.Component {
   //     this.setState({ order: null });
   //   }
   // }
+  state = {
+    authenticated: false,
+  };
 
   // static getDerivedStateFromProps(props, state) {
   //   console.log("derived");
@@ -46,15 +49,29 @@ class CustomLayout extends React.Component {
 
   componentDidMount() {
     console.log(!!localStorage.getItem("token"));
-    if (this.props.authenticated) {
+    if (!!localStorage.getItem("token")) {
       this.props.fetchCart();
       console.log("after logged in token");
     }
   }
 
+  componentDidUpdate(prevState, prevProps) {
+    // if (
+    //   prevProps.order !== this.props.order &&
+    //   localStorage.getItem("token") !== null
+    // ) {
+    //   this.props.fetchCart();
+    // }
+    // if (
+    //   prevProps.order !== this.props.order &&
+    //   localStorage.getItem("token") === null
+    // ) {
+    //   this.setState({ order: null });
+    // }
+  }
+
   render() {
     const { authenticated, loading, order } = this.props;
-    //const { order, authenticated } = this.state;
 
     return (
       <Container>

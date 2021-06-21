@@ -12,10 +12,14 @@ export const removeCart = (id) => `${endpoint}/remove-from-cart/${id}/`;
 export const getAddresses = `${endpoint}/address/`;
 export const deleteAddress = (id) => `${endpoint}/address/${id}/`;
 export const postAddress = `${endpoint}/address/`;
-export const updateAddress = (id) => `${endpoint}/address/${id}`;
+export const updateAddress = (id) => `${endpoint}/address/${id}/`;
 export const getProfile = `${endpoint}/profile/`;
+export const editProfile = (id) => `${endpoint}/profile/${id}/`;
 export const getUser = `${endpoint}/user/`;
+export const paymentURL = `${endpoint}/payment/`;
 
+axios.defaults.xsrfCookieName = 'csrftoken'
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 export const authAxios = axios.create({
   baseURL: endpoint,
   headers: {

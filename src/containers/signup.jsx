@@ -33,7 +33,6 @@ class SignupForm extends Component {
 
   render() {
     const { token, loading, error } = this.props;
-
     {
       if (token) {
         return <Redirect to="/" />;

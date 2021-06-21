@@ -14,6 +14,10 @@ import { Link } from "react-router-dom";
 import { authAxios, addToCart } from "../utils";
 import { connect } from "react-redux";
 import { fetchCart } from "../store/actions/cart";
+import { lazyload } from 'react-lazyload';
+
+
+//@lazyload({ height: -10,once: true, offset: -10})
 
 class ProductList extends Component {
   state = {
@@ -74,7 +78,7 @@ class ProductList extends Component {
           <Grid container columns={1}>
             {this.state.epro.map((item) => {
               return (
-                <Grid.Column>
+                <Grid.Column mobile={16} tablet={8} computer={4}>
                   <Item key={item.id}>
                     <Container>
                       <Item.Image src={item.image} />
@@ -114,7 +118,7 @@ class ProductList extends Component {
           <Grid container columns={4}>
             {this.state.uwpro.map((item) => {
               return (
-                <Grid.Column>
+                <Grid.Column mobile={16} tablet={8} computer={4} >
                   <Item key={item.id}>
                     <Item.Image src={item.image} />
 
@@ -153,7 +157,7 @@ class ProductList extends Component {
           <Grid container columns={4}>
             {this.state.lwpro.map((item) => {
               return (
-                <Grid.Column>
+                <Grid.Column mobile={16} tablet={8} computer={4} >
                   <Item key={item.id}>
                     <Item.Image src={item.image} />
 
